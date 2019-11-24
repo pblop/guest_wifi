@@ -1,0 +1,19 @@
+{
+    "client_list_length": "1",
+    "clients": {
+        "d6:55:71:d6:a0:2c": {
+            "id": "1",
+            "ip": "192.168.10.55",
+            "mac": "d6:55:71:d6:a0:2c",
+            "added": "0",
+            "active": "1574450187",
+            "duration": "0",
+            "token": "ff7d9b94",
+            "state": "Preauthenticated",
+            "downloaded": "0",
+            "avg_down_speed": "0.00",
+            "uploaded": "0",
+            "avg_up_speed": "0.00"
+        }
+    }
+}
