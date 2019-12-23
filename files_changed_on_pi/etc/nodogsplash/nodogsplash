@@ -1,0 +1,39 @@
+GatewayInterface wlan0
+
+FirewallRuleSet authenticated-users {
+  FirewallRule allow all
+}
+FirewallRuleSet preauthenticated-users {
+   FirewallRule allow tcp port 53
+   FirewallRule allow udp port 53
+}
+FirewallRuleSet users-to-router {
+    FirewallRule allow udp port 53
+    FirewallRule allow tcp port 53
+    FirewallRule allow udp port 67
+   FirewallRule allow tcp port 22
+   FirewallRule allow tcp port 80
+   FirewallRule allow tcp port 443
+}
+
+GatewayName Invitados
+GatewayAddress 192.168.10.1
+GatewayPort 2050
+
+MaxClients 250
+
+SessionTimeout 0
+PreAuthIdleTimeout 10
+AuthIdleTimeout 120
+CheckInterval 30
+MACMechanism block
+TrafficControl no
+DownloadLimit 0
+UploadLimit 0
+
+DebugLevel 5
+
+
+fasport 5000
+faspath /
+fas_secure_enabled 1
