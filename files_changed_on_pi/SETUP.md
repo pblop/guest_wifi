@@ -123,3 +123,13 @@ $ sudo nano /etc/nodogsplash/nodogsplash.conf
 ```
 $ sudo nano /etc/rc.local
 ```
+
+# Add the custom captive portal backend files to ~/captive_portal
+
+- Don't forget it's all python3
+
+# Restart
+
+```
+$ sudo reboot
+```
