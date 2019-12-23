@@ -4,11 +4,13 @@ from threading import Thread, Event
 import time
 from random import randint
 import ndsctl
+from lcd import LCD
 import json
-import serial
+# import serial
 
 app = Flask(__name__, static_folder='./static')
-ser = serial.Serial('/dev/ttyACM0')
+# ser = serial.Serial('/dev/ttyACM0')
+lcd = LCD()
 
 stop_event = Event()
 auth_number = None
@@ -51,7 +53,8 @@ def gen_numbers_worker():
     auth_number = gen_number()
     for i in range(16):
       print(f'Number: {auth_number}. {16-i}/16')
-      ser.write(f'code={auth_number};seconds={16-i};'.encode('utf-8'))
+      lcd.write(code=auth_number, seconds_remaining=(16-i))
+      # ser.write(f'code={auth_number};seconds={16-i};'.encode('utf-8'))
       time.sleep(1)
 
 def flask_worker():
