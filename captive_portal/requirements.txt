@@ -1,0 +1,4 @@
+RPLCD
+RPi.GPIO
+flask
+waitress
