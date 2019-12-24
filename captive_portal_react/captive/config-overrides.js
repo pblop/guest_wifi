@@ -1,4 +1,11 @@
-const { override, fixBabelImports, addLessLoader } = require('customize-cra')
+const {
+  override,
+  fixBabelImports,
+  addLessLoader,
+  addWebpackPlugin
+} = require('customize-cra')
+const AntdDayjsWebpackPlugin = require('antd-dayjs-webpack-plugin')
+
 const darkTheme = {
   '@light': '#fff',
   '@dark': '#000',
@@ -109,5 +116,6 @@ module.exports = override(
   addLessLoader({
     javascriptEnabled: true,
     modifyVars: darkTheme
-  })
+  }),
+  addWebpackPlugin(new AntdDayjsWebpackPlugin())
 )
