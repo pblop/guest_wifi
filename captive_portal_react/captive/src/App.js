@@ -74,6 +74,7 @@ class App extends React.Component {
               <Input
                 style={{ width: '6em', textAlign: 'center' }}
                 placeholder='Código'
+                type='tel'
                 maxLength={6}
                 onChange={event =>
                   this.setState({
