@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, abort
+from flask import Flask, request, redirect, abort, jsonify
 from waitress import serve
 from threading import Thread, Event
 import time
@@ -27,18 +27,52 @@ def check():
   code = request.args.get('code')
   ip = request.remote_addr
 
+  client = ndsctl.get_client_by(ip)
+  if client['state'] != 'Authenticated':
+    return redirect(f'/', code=302)
+
   if code == auth_number:
-    client = ndsctl.get_client_by(ip)
-    if client['state'] != 'Authenticated':
+    try:
+      ndsctl.authenticate(ip)
+      return redirect('https://google.es', code=302)
+    except ndsctl.AuthenticateException:
+      print(f'Error authenticating {ip}')
+      print('Client: ' + json.dumps(client))
+      return abort(f'/', code=500)
+  else:
+    return redirect('https://google.es', code=302)
+
+@app.route("/checkjson")
+def check():
+  json = request.get_json()
+  if json == None:
+    return abort(f'/', code=400)
+
+  ip = request.remote_addr
+
+  client = ndsctl.get_client_by(ip)
+  if client['state'] != 'Authenticated':
+    return jsonify({
+        "connected": True
+        })
+
+  code = json['code']
+  if code == auth_number:
       try:
         ndsctl.authenticate(ip)
-        return redirect('https://google.es', code=302)
+        return jsonify({
+          "connected": True
+          })
       except ndsctl.AuthenticateException:
         print(f'Error authenticating {ip}')
         print('Client: ' + json.dumps(client))
-        return abort(f'/', code=500)
+        return jsonify({
+          "connected": False
+          })
   else:
-    return redirect(f'/', code=302)
+    return jsonify({
+          "connected": False
+          })
 
 @app.route("/num")
 def num():
