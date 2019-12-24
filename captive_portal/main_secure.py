@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, abort, jsonify
+from flask import Flask, request, redirect, abort, jsonify, send_from_directory
 from waitress import serve
 from threading import Thread, Event
 import time
@@ -6,10 +6,8 @@ from random import randint
 import ndsctl
 from lcd import LCD
 import json
-# import serial
 
-app = Flask(__name__, static_folder='./static')
-# ser = serial.Serial('/dev/ttyACM0')
+app = Flask(__name__)
 lcd = LCD()
 
 stop_event = Event()
@@ -18,18 +16,14 @@ auth_number = None
 def gen_number():
   return ''.join([str(randint(0, 9)) for _ in range(6)])
 
-@app.route("/")
-def main():
-  return app.send_static_file('./index.html')
-
 @app.route("/check")
 def check():
   code = request.args.get('code')
   ip = request.remote_addr
 
   client = ndsctl.get_client_by(ip)
-  if client['state'] != 'Authenticated':
-    return redirect(f'/', code=302)
+  if client['state'] == 'Authenticated':
+    return redirect('https://google.es', code=302)
 
   if code == auth_number:
     try:
@@ -42,8 +36,8 @@ def check():
   else:
     return redirect('https://google.es', code=302)
 
-@app.route("/checkjson")
-def check():
+@app.route("/checkjson", methods=['POST'])
+def checkjson():
   json = request.get_json()
   if json == None:
     return abort(f'/', code=400)
@@ -51,9 +45,9 @@ def check():
   ip = request.remote_addr
 
   client = ndsctl.get_client_by(ip)
-  if client['state'] != 'Authenticated':
+  if client['state'] == 'Authenticated':
     return jsonify({
-        "connected": True
+        'status': 'connected'
         })
 
   code = json['code']
@@ -61,22 +55,45 @@ def check():
       try:
         ndsctl.authenticate(ip)
         return jsonify({
-          "connected": True
+          'status': 'connected'
           })
       except ndsctl.AuthenticateException:
         print(f'Error authenticating {ip}')
         print('Client: ' + json.dumps(client))
         return jsonify({
-          "connected": False
+          'status': 'not connected'
           })
   else:
     return jsonify({
-          "connected": False
+          'status': 'not connected'
           })
 
 @app.route("/num")
 def num():
   return "Number: " + auth_number
+
+
+## begin JUST SERVE THE APP ALREADY
+@app.route('/<path:filename>')
+def download_file(filename):
+    return send_from_directory('public',filename)
+
+# TODO: SWITCH FLASK
+# i hate flask, i have to do this just to be able to get files from /public/static
+@app.route('/static/<path:folder>/<path:filename>')
+def download_file2(filename, folder):
+  if folder == 'js':
+    return send_from_directory('public/static/js',filename)
+  elif folder == 'css':
+    return send_from_directory('public/static/css',filename)
+  else:
+    return abort(404)
+
+@app.route('/')
+def main():
+    return send_from_directory('public','index.html')
+
+## end JUST SERVE THE APP ALREADY
 
 def gen_numbers_worker():
   """generates random numbers each minute"""
@@ -86,14 +103,11 @@ def gen_numbers_worker():
     global auth_number
     auth_number = gen_number()
     for i in range(16):
-      print(f'Number: {auth_number}. {16-i}/16')
       lcd.write(code=auth_number, seconds_remaining=(16-i))
-      # ser.write(f'code={auth_number};seconds={16-i};'.encode('utf-8'))
       time.sleep(1)
 
 def flask_worker():
   serve(app, host='0.0.0.0', port='5000')
-  # app.run(debug=False, use_reloader=False)
 
 if __name__ == "__main__":
   gen_numbers_t = Thread(target=gen_numbers_worker, args=())
