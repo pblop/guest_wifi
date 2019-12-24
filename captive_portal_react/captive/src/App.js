@@ -24,9 +24,9 @@ class App extends React.Component {
     })
     fetch('/checkjson', {
       method: 'POST',
-      body: {
+      body: JSON.stringify({
         code: this.state.inputCode
-      },
+      }),
       headers: {
         'Content-Type': 'application/json'
       }
